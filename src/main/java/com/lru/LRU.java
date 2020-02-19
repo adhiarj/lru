@@ -79,20 +79,17 @@ public class LRU<K, V> {
     }
 
     private Node<K,V> insertIntoHead(Node<K,V> node) {
-        try {
-            lock.lock();
-            Node curNext = head.next;
-            head.next = node;
-            node.prev = head;
-            node.next = curNext;
-            curNext.prev = node;
-            return node;
-        } finally {
-            lock.unlock();
-        }
-
+        Node curNext = head.next;
+        head.next = node;
+        node.prev = head;
+        node.next = curNext;
+        curNext.prev = node;
+        return node;
     }
 
+    /**
+     * keeping the locks on this private method - as this could arguably made public
+     */
     private void cleanUp() {
         try {
             lock.lock();
@@ -107,17 +104,11 @@ public class LRU<K, V> {
     }
 
     private void moveToHead(Node node) {
-        try {
-            lock.lock();
-            Node nodesPrev = node.prev;
-            Node nodesNext = node.next;
-            nodesPrev.next = nodesNext;
-            nodesNext.prev = nodesPrev;
-            insertIntoHead(node);
-        } finally {
-            lock.unlock();;
-        }
-
+        Node nodesPrev = node.prev;
+        Node nodesNext = node.next;
+        nodesPrev.next = nodesNext;
+        nodesNext.prev = nodesPrev;
+        insertIntoHead(node);
     }
 
     private class Node<K,V> {
